@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface Image extends Document {
+interface IImage extends Document {
   name: string;
   imageUrl: string;
   productId: Schema.Types.ObjectId;
@@ -8,7 +8,7 @@ interface Image extends Document {
   updatedAt: Date;
 }
 
-const ImageSchema: Schema<Image> = new mongoose.Schema(
+const ImageSchema: Schema<IImage> = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -30,4 +30,4 @@ const ImageSchema: Schema<Image> = new mongoose.Schema(
   { timestamps: true },
 );
 
-export default mongoose.model<Image>('Image', ImageSchema);
+export default mongoose.model<IImage>('Image', ImageSchema);

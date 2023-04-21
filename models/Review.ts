@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface Review extends Document {
+interface IReview extends Document {
   rating: Number;
   title: string;
   comment: string;
@@ -10,7 +10,7 @@ interface Review extends Document {
   updatedAt: Date;
 }
 
-const ReviewSchema = new mongoose.Schema<Review>(
+const ReviewSchema = new mongoose.Schema<IReview>(
   {
     rating: {
       type: Number,
@@ -43,4 +43,4 @@ const ReviewSchema = new mongoose.Schema<Review>(
 );
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
-export default mongoose.model<Review>('Review', ReviewSchema);
+export default mongoose.model<IReview>('Review', ReviewSchema);

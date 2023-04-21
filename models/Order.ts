@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface SingleOrderItem extends Document {
+interface ISingleOrderItem extends Document {
   color: string;
   price: Number;
   quantity: Number;
@@ -8,7 +8,7 @@ interface SingleOrderItem extends Document {
   productId: Schema.Types.ObjectId;
 }
 
-const SingleOrderItemSchema = new mongoose.Schema<SingleOrderItem>({
+const SingleOrderItemSchema = new mongoose.Schema<ISingleOrderItem>({
   color: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
@@ -20,18 +20,18 @@ const SingleOrderItemSchema = new mongoose.Schema<SingleOrderItem>({
   },
 });
 
-interface Order extends Document {
+interface IOrder extends Document {
   shippingFee: Number;
   subtotal: Number;
   total: Number;
-  orderItems: [Schema<SingleOrderItem>];
+  orderItems: [Schema<ISingleOrderItem>];
   status: string;
   userId: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const OrderSchema = new mongoose.Schema<Order>(
+const OrderSchema = new mongoose.Schema<IOrder>(
   {
     shippingFee: {
       type: Number,
@@ -60,4 +60,4 @@ const OrderSchema = new mongoose.Schema<Order>(
   { timestamps: true },
 );
 
-module.exports = mongoose.model<Order>('Order', OrderSchema);
+module.exports = mongoose.model<IOrder>('Order', OrderSchema);

@@ -1,13 +1,13 @@
 import mongoose, { Document } from 'mongoose';
 
-interface Company extends Document {
+interface ICompany extends Document {
   name: string;
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const CompanySchema = new mongoose.Schema<Company>(
+const CompanySchema = new mongoose.Schema<ICompany>(
   {
     name: {
       type: String,
@@ -24,4 +24,4 @@ const CompanySchema = new mongoose.Schema<Company>(
   { timestamps: true },
 );
 
-export default mongoose.model<Company>('Company', CompanySchema);
+export default mongoose.model<ICompany>('Company', CompanySchema);

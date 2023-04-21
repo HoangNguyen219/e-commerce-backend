@@ -1,7 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import validator from 'validator';
 
-interface User extends Document {
+interface IUser extends Document {
   name: string;
   email: string;
   password: string;
@@ -10,7 +10,7 @@ interface User extends Document {
   updatedAt: Date;
 }
 
-const UserSchema = new mongoose.Schema<User>(
+const UserSchema = new mongoose.Schema<IUser>(
   {
     name: {
       type: String,
@@ -51,4 +51,4 @@ const UserSchema = new mongoose.Schema<User>(
   { timestamps: true },
 );
 
-export default mongoose.model<User>('User', UserSchema);
+export default mongoose.model<IUser>('User', UserSchema);

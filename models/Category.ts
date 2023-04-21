@@ -1,13 +1,13 @@
 import mongoose, { Document } from 'mongoose';
 
-interface Category extends Document {
+interface ICategory extends Document {
   name: string;
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const CategorySchema = new mongoose.Schema<Category>(
+const CategorySchema = new mongoose.Schema<ICategory>(
   {
     name: {
       type: String,
@@ -24,4 +24,4 @@ const CategorySchema = new mongoose.Schema<Category>(
   { timestamps: true },
 );
 
-export default mongoose.model<Category>('Category', CategorySchema);
+export default mongoose.model<ICategory>('Category', CategorySchema);
