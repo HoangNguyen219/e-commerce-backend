@@ -11,7 +11,8 @@ interface Product extends Document {
   stock: number;
   averageRating: number;
   numOfReviews: number;
-  userId: Types.ObjectId;
+  categoryId: Types.ObjectId;
+  companyId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,9 +66,14 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    userId: {
+    companyId: {
       type: mongoose.Types.ObjectId,
-      ref: 'User',
+      ref: 'Company',
+      required: true,
+    },
+    categoryId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
   },
