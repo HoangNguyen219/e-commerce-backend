@@ -6,12 +6,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import connectDB from './db/connect';
+import notFoundMiddleware from './middlewares/not-found';
+import errorHandlerMiddleware from './middlewares/error-handler';
+import authRouter from './routes/authRoutes';
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 5000;
 
+// middleware
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,9 +25,10 @@ app.use(cors());
 app.use(express.static('./public'));
 app.use(fileUpload());
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server');
-});
+app.use('/api/v1/auth', authRouter);
+
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
