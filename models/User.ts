@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import validator from 'validator';
 
 interface User extends Document {
@@ -10,7 +10,7 @@ interface User extends Document {
   updatedAt: Date;
 }
 
-const UserSchema: Schema<User> = new mongoose.Schema(
+const UserSchema = new mongoose.Schema<User>(
   {
     name: {
       type: String,

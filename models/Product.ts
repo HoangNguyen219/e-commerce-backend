@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Types } from 'mongoose';
+import mongoose, { Document, Types, Schema } from 'mongoose';
 
 interface Product extends Document {
   name: string;
@@ -11,13 +11,15 @@ interface Product extends Document {
   stock: number;
   averageRating: number;
   numOfReviews: number;
-  categoryId: Types.ObjectId;
-  companyId: Types.ObjectId;
+  categoryId: Schema.Types.ObjectId;
+
+  companyId: Schema.Types.ObjectId;
+
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ProductSchema = new mongoose.Schema(
+const ProductSchema = new mongoose.Schema<Product>(
   {
     name: {
       type: String,
@@ -67,12 +69,12 @@ const ProductSchema = new mongoose.Schema(
       default: 0,
     },
     companyId: {
-      type: mongoose.Types.ObjectId,
+      type: Types.ObjectId,
       ref: 'Company',
       required: true,
     },
     categoryId: {
-      type: mongoose.Types.ObjectId,
+      type: Types.ObjectId,
       ref: 'Category',
       required: true,
     },

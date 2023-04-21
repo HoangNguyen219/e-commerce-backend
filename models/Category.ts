@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 interface Category extends Document {
   name: string;
@@ -7,7 +7,7 @@ interface Category extends Document {
   updatedAt: Date;
 }
 
-const CategorySchema: Schema<Category> = new mongoose.Schema(
+const CategorySchema = new mongoose.Schema<Category>(
   {
     name: {
       type: String,

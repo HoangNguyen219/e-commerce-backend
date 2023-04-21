@@ -1,13 +1,14 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface Company extends Document {
+interface Image extends Document {
   name: string;
   imageUrl: string;
+  productId: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const CompanySchema = new mongoose.Schema<Company>(
+const ImageSchema: Schema<Image> = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -20,8 +21,13 @@ const CompanySchema = new mongoose.Schema<Company>(
       default: '/uploads/example.jpeg',
       required: true,
     },
+    productId: {
+      type: Types.ObjectId,
+      ref: 'Product',
+      required: true,
+    },
   },
   { timestamps: true },
 );
 
-export default mongoose.model<Company>('Company', CompanySchema);
+export default mongoose.model<Image>('Image', ImageSchema);
