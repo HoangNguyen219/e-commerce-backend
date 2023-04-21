@@ -30,7 +30,17 @@ const UserSchema: Schema<User> = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Please provide password'],
-      minlength: 6,
+      validate: {
+        validator: (value: string) => {
+          return validator.isStrongPassword(value, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+          });
+        },
+        message: 'Password must have at least 8 characters, one lowercase letter, one uppercase letter and one number',
+      },
     },
     role: {
       type: String,
