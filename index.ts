@@ -9,6 +9,7 @@ import connectDB from './db/connect';
 import notFoundMiddleware from './middlewares/not-found';
 import errorHandlerMiddleware from './middlewares/error-handler';
 import authRouter from './routes/authRoutes';
+import userRouter from './routes/userRoutes';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(express.static('./public'));
 app.use(fileUpload());
 
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/users', userRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
