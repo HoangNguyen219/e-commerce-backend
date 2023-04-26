@@ -10,8 +10,17 @@ import notFoundMiddleware from './middlewares/not-found';
 import errorHandlerMiddleware from './middlewares/error-handler';
 import authRouter from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
+import productRouter from './routes/productRoutes';
+import cloudinary from 'cloudinary';
 
 dotenv.config();
+
+const cloudinaryV2 = cloudinary.v2;
+cloudinaryV2.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
 
 const app: Express = express();
 const port = process.env.PORT || 5000;
@@ -24,10 +33,11 @@ app.use(cookieParser(process.env.JWT_SECRET));
 app.use(cors());
 
 app.use(express.static('./public'));
-app.use(fileUpload());
+app.use(fileUpload({ useTempFiles: true }));
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/products', productRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

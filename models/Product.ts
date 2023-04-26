@@ -1,6 +1,5 @@
 import mongoose, { Document, Types, Schema } from 'mongoose';
 import Review from './Review';
-import Image from './Image';
 
 interface IProductImage extends Document {
   name: string;
