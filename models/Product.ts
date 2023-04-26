@@ -2,13 +2,11 @@ import mongoose, { Document, Types, Schema } from 'mongoose';
 import Review from './Review';
 
 interface IProductImage extends Document {
-  name: string;
   primaryImage: boolean;
   imageUrl: string;
 }
 
 const ProductImageSchema = new mongoose.Schema<IProductImage>({
-  name: { type: String, required: true },
   primaryImage: { type: Boolean, required: true, default: false },
   imageUrl: { type: String, required: true },
 });
@@ -92,7 +90,7 @@ const ProductSchema = new mongoose.Schema<IProduct>(
 ProductSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
-  foreignField: 'product',
+  foreignField: 'productId',
   justOne: false,
 });
 
