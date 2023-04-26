@@ -4,10 +4,26 @@ import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import fs from 'fs';
 import cloudinary from 'cloudinary';
+import Category from '../models/Category';
+import Company from '../models/Company';
 
 const cloudinaryV2 = cloudinary.v2;
 
 const createProduct = async (req: Request, res: Response) => {
+  const { categoryId, companyId } = req.body;
+
+  const isValidCategory = await Category.findOne({ _id: categoryId });
+
+  if (!isValidCategory) {
+    throw new NotFoundError(`No category with id : ${categoryId}`);
+  }
+
+  const isValidCompany = await Company.findOne({ _id: companyId });
+
+  if (!isValidCompany) {
+    throw new NotFoundError(`No company with id : ${companyId}`);
+  }
+
   const product = await Product.create(req.body);
   res.status(StatusCodes.CREATED).json({ product });
 };
