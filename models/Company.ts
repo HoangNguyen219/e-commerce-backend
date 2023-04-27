@@ -27,7 +27,7 @@ CompanySchema.virtual('products', {
   justOne: false,
 });
 
-CompanySchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+CompanySchema.pre('deleteOne', { document: true, query: false }, async function () {
   await Product.deleteMany({ companyId: this._id });
 });
 
