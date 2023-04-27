@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
@@ -62,8 +62,6 @@ const UserSchema = new mongoose.Schema<IUser>(
 );
 
 UserSchema.pre('save', async function () {
-  //   console.log(this.modifiedPaths());
-  //   console.log(this.isModified('name'));
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import 'express-async-errors';
 import morgan from 'morgan';
@@ -11,6 +11,8 @@ import errorHandlerMiddleware from './middlewares/error-handler';
 import authRouter from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
 import productRouter from './routes/productRoutes';
+import categoryRouter from './routes/categoryRoutes';
+import companyRouter from './routes/companyRoutes';
 import cloudinary from 'cloudinary';
 
 dotenv.config();
@@ -38,6 +40,8 @@ app.use(fileUpload({ useTempFiles: true }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/companies', companyRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

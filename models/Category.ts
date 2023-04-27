@@ -17,18 +17,18 @@ const CategorySchema = new mongoose.Schema<ICategory>(
       maxlength: 50,
     },
   },
-  { timestamps: true },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
 CategorySchema.virtual('products', {
   ref: 'Product',
   localField: '_id',
-  foreignField: 'productId',
+  foreignField: 'categoryId',
   justOne: false,
 });
 
-CategorySchema.pre<ICategory>('deleteOne', async function (next) {
-  await Product.deleteMany({ product: this._id });
+CategorySchema.pre('deleteOne', { document: true, query: false }, async function () {
+  await Product.deleteMany({ categoryId: this._id });
 });
 
 export default mongoose.model<ICategory>('Category', CategorySchema);

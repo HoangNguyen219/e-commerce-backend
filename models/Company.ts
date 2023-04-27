@@ -17,18 +17,18 @@ const CompanySchema = new mongoose.Schema<ICompany>(
       maxlength: 50,
     },
   },
-  { timestamps: true },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
 CompanySchema.virtual('products', {
   ref: 'Product',
   localField: '_id',
-  foreignField: 'productId',
+  foreignField: 'companyId',
   justOne: false,
 });
 
-CompanySchema.pre<ICompany>('deleteOne', async function (next) {
-  await Product.deleteMany({ product: this._id });
+CompanySchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+  await Product.deleteMany({ companyId: this._id });
 });
 
 export default mongoose.model<ICompany>('Company', CompanySchema);
