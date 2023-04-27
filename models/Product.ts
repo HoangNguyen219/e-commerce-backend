@@ -1,21 +1,12 @@
 import mongoose, { Document, Types, Schema } from 'mongoose';
 import Review from './Review';
 
-interface IProductImage extends Document {
-  primaryImage: boolean;
-  imageUrl: string;
-}
-
-const ProductImageSchema = new mongoose.Schema<IProductImage>({
-  primaryImage: { type: Boolean, required: true, default: false },
-  imageUrl: { type: String, required: true },
-});
-
 interface IProduct extends Document {
   name: string;
   price: number;
   description: string;
-  productImages: [Schema<IProductImage>];
+  primaryImage: string;
+  secondaryImages: string[];
   colors: string[];
   featured: boolean;
   freeShipping: boolean;
@@ -46,7 +37,13 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       required: [true, 'Please provide product description'],
       maxlength: [1000, 'Description can not be more than 1000 characters'],
     },
-    productImages: [ProductImageSchema],
+    primaryImage: {
+      type: String,
+      required: true,
+    },
+    secondaryImages: {
+      type: [String],
+    },
     colors: {
       type: [String],
       default: ['#222'],
@@ -84,7 +81,7 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
 ProductSchema.virtual('reviews', {
@@ -94,8 +91,8 @@ ProductSchema.virtual('reviews', {
   justOne: false,
 });
 
-ProductSchema.pre<IProduct>('deleteOne', async function (next) {
-  await Review.deleteMany({ product: this._id });
+ProductSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  await Review.deleteMany({ productId: this._id });
 });
 
 export default mongoose.model<IProduct>('Product', ProductSchema);
