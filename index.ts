@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import 'express-async-errors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import connectDB from './db/connect';
 import notFoundMiddleware from './middlewares/not-found';
@@ -14,6 +13,7 @@ import productRouter from './routes/productRoutes';
 import categoryRouter from './routes/categoryRoutes';
 import companyRouter from './routes/companyRoutes';
 import reviewRouter from './routes/reviewRoutes';
+import orderRouter from './routes/orderRoutes';
 import cloudinary from 'cloudinary';
 
 dotenv.config();
@@ -33,7 +33,6 @@ app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.JWT_SECRET));
-app.use(cors());
 
 app.use(express.static('./public'));
 app.use(fileUpload({ useTempFiles: true }));
@@ -44,6 +43,7 @@ app.use('/api/v1/products', productRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/companies', companyRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/orders', orderRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
@@ -51,7 +51,9 @@ app.use(errorHandlerMiddleware);
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URL!);
-    app.listen(port, () => console.log(`⚡️[server]: Server is running at http://localhost:${port}`));
+    app.listen(port, () =>
+      console.log(`⚡️[server]: Server is running at http://localhost:${port}`),
+    );
   } catch (error) {
     console.log(error);
   }

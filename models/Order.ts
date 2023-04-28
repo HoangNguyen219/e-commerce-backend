@@ -1,10 +1,10 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface ISingleOrderItem extends Document {
+export interface ISingleOrderItem extends Document {
   color: string;
   price: Number;
   quantity: Number;
-  subtotal: Number;
+  itemTotal: Number;
   productId: Schema.Types.ObjectId;
 }
 
@@ -12,7 +12,7 @@ const SingleOrderItemSchema = new mongoose.Schema<ISingleOrderItem>({
   color: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
-  subtotal: { type: Number, required: true },
+  itemTotal: { type: Number, required: true },
   productId: {
     type: Types.ObjectId,
     ref: 'Product',
@@ -27,6 +27,8 @@ interface IOrder extends Document {
   orderItems: [Schema<ISingleOrderItem>];
   status: string;
   userId: Schema.Types.ObjectId;
+  clientSecret: string;
+  paymentIntentId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,8 +58,15 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       ref: 'User',
       required: true,
     },
+    clientSecret: {
+      type: String,
+      required: true,
+    },
+    paymentIntentId: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model<IOrder>('Order', OrderSchema);
+export default mongoose.model<IOrder>('Order', OrderSchema);
