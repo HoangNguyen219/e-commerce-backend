@@ -10,7 +10,7 @@ import Company from '../models/Company';
 const cloudinaryV2 = cloudinary.v2;
 
 const createProduct = async (req: Request, res: Response) => {
-  const { categoryId, companyId } = req.body;
+  const { categoryId, companyId, secondaryImages } = req.body;
 
   const isValidCategory = await Category.findOne({ _id: categoryId });
 
@@ -22,6 +22,10 @@ const createProduct = async (req: Request, res: Response) => {
 
   if (!isValidCompany) {
     throw new NotFoundError(`No company with id : ${companyId}`);
+  }
+
+  if (!secondaryImages || secondaryImages.length < 1) {
+    delete req.body.secondaryImages;
   }
 
   const product = await Product.create(req.body);
@@ -36,7 +40,10 @@ const getAllProducts = async (req: Request, res: Response) => {
 const getSingleProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
 
-  const product = await Product.findOne({ _id: productId }).populate('reviews');
+  const product = await Product.findOne({ _id: productId })
+    .populate('reviews')
+    .populate('categoryId')
+    .populate('companyId');
 
   if (!product) {
     throw new NotFoundError(`No product with id: ${productId}`);
@@ -46,7 +53,11 @@ const getSingleProduct = async (req: Request, res: Response) => {
 };
 
 const updateProduct = async (req: Request, res: Response) => {
-  const { id: productId } = req.params;
+  const { id: productId, secondaryImages } = req.params;
+
+  if (!secondaryImages || secondaryImages.length < 1) {
+    delete req.body.secondaryImages;
+  }
 
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
     new: true,
@@ -89,12 +100,24 @@ const uploadImage = async (req: Request, res: Response) => {
       throw new BadRequestError('Please upload image smaller than 1MB');
     }
 
-    const result = await cloudinaryV2.uploader.upload(productImage.tempFilePath, {
-      folder: 'NTH-Store',
-    });
+    const result = await cloudinaryV2.uploader.upload(
+      productImage.tempFilePath,
+      {
+        folder: 'NTH-Store',
+      },
+    );
     fs.unlinkSync(productImage.tempFilePath);
-    return res.status(StatusCodes.OK).json({ image: { src: result.secure_url } });
+    return res
+      .status(StatusCodes.OK)
+      .json({ image: { src: result.secure_url } });
   }
 };
 
-export { createProduct, getAllProducts, getSingleProduct, updateProduct, deleteProduct, uploadImage };
+export {
+  createProduct,
+  getAllProducts,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
+  uploadImage,
+};

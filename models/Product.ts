@@ -43,6 +43,7 @@ const ProductSchema = new mongoose.Schema<IProduct>(
     },
     secondaryImages: {
       type: [String],
+      default: [],
     },
     colors: {
       type: [String],
@@ -81,7 +82,11 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       required: true,
     },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 ProductSchema.virtual('reviews', {
@@ -91,8 +96,12 @@ ProductSchema.virtual('reviews', {
   justOne: false,
 });
 
-ProductSchema.pre('deleteOne', { document: true, query: false }, async function () {
-  await Review.deleteMany({ productId: this._id });
-});
+ProductSchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function () {
+    await Review.deleteMany({ productId: this._id });
+  },
+);
 
 export default mongoose.model<IProduct>('Product', ProductSchema);
