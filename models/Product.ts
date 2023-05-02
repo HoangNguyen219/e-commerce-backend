@@ -1,5 +1,34 @@
 import mongoose, { Document, Types, Schema } from 'mongoose';
 import Review from './Review';
+import Company from './Company';
+import Category from './Category';
+
+export interface IColorStock extends Document {
+  color: string;
+  stock: Number;
+}
+
+const ColorStockSchema = new mongoose.Schema<IColorStock>({
+  color: {
+    type: String,
+    default: 'black',
+    required: true,
+    enum: [
+      'black',
+      'white',
+      'gray',
+      'brown',
+      'red',
+      'purple',
+      'green',
+      'olive',
+      'yellow',
+      'navy',
+      'blue',
+    ],
+  },
+  stock: { type: Number, required: true, default: 15, min: 0 },
+});
 
 interface IProduct extends Document {
   name: string;
@@ -7,10 +36,9 @@ interface IProduct extends Document {
   description: string;
   primaryImage: string;
   secondaryImages: string[];
-  colors: string[];
+  colorStocks: [IColorStock];
   featured: boolean;
   freeShipping: boolean;
-  stock: number;
   averageRating: number;
   numOfReviews: number;
   categoryId: Schema.Types.ObjectId;
@@ -24,12 +52,14 @@ const ProductSchema = new mongoose.Schema<IProduct>(
     name: {
       type: String,
       trim: true,
+      unique: true,
       require: [true, 'Please provide product name'],
       maxLength: [100, 'Name can not be more than 100 characters'],
     },
     price: {
       type: Number,
       required: [true, 'Please provide product price'],
+      min: 0,
       default: 0,
     },
     description: {
@@ -45,10 +75,18 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       type: [String],
       default: [],
     },
-    colors: {
-      type: [String],
-      default: ['#222'],
+    colorStocks: {
+      type: [ColorStockSchema],
       required: true,
+      validate: {
+        validator: function (value: IColorStock[]): boolean {
+          const uniqueColors = new Set(
+            value.map(colorStock => colorStock.color),
+          );
+          return uniqueColors.size === value.length;
+        },
+        message: `Duplicate color in product colorStock`,
+      },
     },
     featured: {
       type: Boolean,
@@ -57,11 +95,6 @@ const ProductSchema = new mongoose.Schema<IProduct>(
     freeShipping: {
       type: Boolean,
       default: false,
-    },
-    stock: {
-      type: Number,
-      required: true,
-      default: 15,
     },
     averageRating: {
       type: Number,
@@ -75,11 +108,33 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       type: Types.ObjectId,
       ref: 'Company',
       required: true,
+      validate: {
+        validator: async function (value: string) {
+          try {
+            const company = await Company.findById(value);
+            return company !== null;
+          } catch (err) {
+            return false;
+          }
+        },
+        message: props => `${props.value} is not a valid company Id`,
+      },
     },
     categoryId: {
       type: Types.ObjectId,
       ref: 'Category',
       required: true,
+      validate: {
+        validator: async function (value: string) {
+          try {
+            const category = await Category.findById(value);
+            return category !== null;
+          } catch (err) {
+            return false;
+          }
+        },
+        message: props => `${props.value} is not a valid category Id`,
+      },
     },
   },
   {
@@ -103,5 +158,4 @@ ProductSchema.pre(
     await Review.deleteMany({ productId: this._id });
   },
 );
-
 export default mongoose.model<IProduct>('Product', ProductSchema);

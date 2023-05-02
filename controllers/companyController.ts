@@ -9,14 +9,16 @@ const createCompany = async (req: Request, res: Response) => {
 };
 
 const getAllCompanies = async (req: Request, res: Response) => {
-  const categories = await Company.find({});
-  res.status(StatusCodes.OK).json({ categories, count: categories.length });
+  const companies = await Company.find({});
+  res.status(StatusCodes.OK).json({ companies, count: companies.length });
 };
 
 const getSingleCompany = async (req: Request, res: Response) => {
   const { id: companyId } = req.params;
 
-  const company = await Company.findOne({ _id: companyId }).populate('products');
+  const company = await Company.findOne({ _id: companyId }).populate(
+    'products',
+  );
 
   if (!company) {
     throw new NotFoundError(`No company with id: ${companyId}`);
@@ -53,4 +55,10 @@ const deleteCompany = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ msg: 'Company removed' });
 };
 
-export { createCompany, getAllCompanies, getSingleCompany, updateCompany, deleteCompany };
+export {
+  createCompany,
+  getAllCompanies,
+  getSingleCompany,
+  updateCompany,
+  deleteCompany,
+};

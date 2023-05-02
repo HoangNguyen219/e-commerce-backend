@@ -10,24 +10,6 @@ import Company from '../models/Company';
 const cloudinaryV2 = cloudinary.v2;
 
 const createProduct = async (req: Request, res: Response) => {
-  const { categoryId, companyId, secondaryImages } = req.body;
-
-  const isValidCategory = await Category.findOne({ _id: categoryId });
-
-  if (!isValidCategory) {
-    throw new NotFoundError(`No category with id : ${categoryId}`);
-  }
-
-  const isValidCompany = await Company.findOne({ _id: companyId });
-
-  if (!isValidCompany) {
-    throw new NotFoundError(`No company with id : ${companyId}`);
-  }
-
-  if (!secondaryImages || secondaryImages.length < 1) {
-    delete req.body.secondaryImages;
-  }
-
   const product = await Product.create(req.body);
   res.status(StatusCodes.CREATED).json({ product });
 };
@@ -53,11 +35,7 @@ const getSingleProduct = async (req: Request, res: Response) => {
 };
 
 const updateProduct = async (req: Request, res: Response) => {
-  const { id: productId, secondaryImages } = req.params;
-
-  if (!secondaryImages || secondaryImages.length < 1) {
-    delete req.body.secondaryImages;
-  }
+  const { id: productId } = req.params;
 
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
     new: true,

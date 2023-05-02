@@ -49,7 +49,8 @@ const UserSchema = new mongoose.Schema<IUser>(
             minSymbols: 0,
           });
         },
-        message: 'Password must have at least 8 characters, one lowercase letter, one uppercase letter and one number',
+        message:
+          'Password must have at least 8 characters, one lowercase letter, one uppercase letter and one number',
       },
     },
     role: {
@@ -67,7 +68,9 @@ UserSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-UserSchema.methods.comparePassword = async function (canditatePassword: string) {
+UserSchema.methods.comparePassword = async function (
+  canditatePassword: string,
+) {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);
   return isMatch;
 };
