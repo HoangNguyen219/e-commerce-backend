@@ -6,7 +6,7 @@ import { createTokenUser, attachCookiesToResponse, Message } from '../utils';
 import { Role } from '../utils';
 
 const register = async (req: Request, res: Response) => {
-  const { username, email, password, confirmPassword } = req.body;
+  const { name, email, password, confirmPassword } = req.body;
 
   if (password !== confirmPassword) {
     throw new BadRequestError(Message.PASSWORD_DO_NOT_MATCH);
@@ -16,17 +16,17 @@ const register = async (req: Request, res: Response) => {
   const isFirstAccount = (await User.countDocuments({})) === 0;
   const role = isFirstAccount ? Role.Admin : Role.User;
 
-  await User.create({ username, email, password, role });
+  await User.create({ name, email, password, role });
   res.status(StatusCodes.CREATED).json({ msg: 'User has been created' });
 };
 
 const login = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     throw new BadRequestError(Message.PLEASE_PROVIDE_ALL_VALUES);
   }
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ email });
 
   if (!user) {
     throw new UnauthenticatedError(Message.INVALID_CREDENTIALS);

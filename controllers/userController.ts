@@ -1,8 +1,16 @@
 import User from '../models/User';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BadRequestError, UnauthenticatedError, NotFoundError } from '../errors';
-import { createTokenUser, attachCookiesToResponse, checkPermissions } from '../utils';
+import {
+  BadRequestError,
+  UnauthenticatedError,
+  NotFoundError,
+} from '../errors';
+import {
+  createTokenUser,
+  attachCookiesToResponse,
+  checkPermissions,
+} from '../utils';
 import { Message, Role } from '../utils/enum';
 
 const getAllUsers = async (req: Request, res: Response) => {
@@ -32,7 +40,7 @@ const updateUser = async (req: Request, res: Response) => {
   const user = await User.findOne({ _id: req.user.id });
 
   user!.email = email;
-  user!.username = username;
+  user!.name = username;
 
   await user!.save();
 
@@ -63,4 +71,10 @@ const updateUserPassword = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ msg: 'Password Updated' });
 };
 
-export { getAllUsers, getSingleUser, showCurrentUser, updateUser, updateUserPassword };
+export {
+  getAllUsers,
+  getSingleUser,
+  showCurrentUser,
+  updateUser,
+  updateUserPassword,
+};

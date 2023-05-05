@@ -4,12 +4,12 @@ import bcrypt from 'bcrypt';
 
 export interface ITokenUser {
   id: string;
-  username: string;
+  name: string;
   role: string;
 }
 
 export interface IUser extends Document {
-  username: string;
+  name: string;
   email: string;
   password: string;
   role: 'admin' | 'user';
@@ -20,12 +20,19 @@ export interface IUser extends Document {
 
 const UserSchema = new mongoose.Schema<IUser>(
   {
-    username: {
+    name: {
       type: String,
-      unique: true,
       required: [true, 'Please provide name'],
       minlength: 3,
       maxlength: 50,
+      unique: true,
+      validate: {
+        validator: function (value: string) {
+          return /^[a-zA-Z][a-zA-Z0-9 ]*$/.test(value);
+        },
+        message:
+          'Please provide a valid name that starts with a letter and contains no special characters',
+      },
     },
     email: {
       type: String,

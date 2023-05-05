@@ -11,14 +11,18 @@ declare global {
   }
 }
 
-const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+const authenticateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const token = req.signedCookies.token;
   if (!token) {
     throw new UnauthenticatedError(Message.AUTHENTICATION_INVALID);
   }
   try {
-    const { username, id, role } = isTokenValid(token);
-    req.user = { username, id, role };
+    const { name, id, role } = isTokenValid(token);
+    req.user = { name, id, role };
     next();
   } catch (error) {
     throw new UnauthenticatedError(Message.AUTHENTICATION_INVALID);

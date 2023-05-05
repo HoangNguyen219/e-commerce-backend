@@ -4,8 +4,6 @@ import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import fs from 'fs';
 import cloudinary from 'cloudinary';
-import Category from '../models/Category';
-import Company from '../models/Company';
 
 const cloudinaryV2 = cloudinary.v2;
 
