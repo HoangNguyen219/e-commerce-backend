@@ -8,6 +8,23 @@ export interface IColorStock extends Document {
   stock: Number;
 }
 
+interface IProduct extends Document {
+  name: string;
+  price: number;
+  description: string;
+  primaryImage: string;
+  secondaryImages: string[];
+  colorStocks: [IColorStock];
+  featured: boolean;
+  freeShipping: boolean;
+  averageRating: number;
+  numOfReviews: number;
+  categoryId: Schema.Types.ObjectId;
+  companyId: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const ColorStockSchema = new mongoose.Schema<IColorStock>({
   color: {
     type: String,
@@ -29,23 +46,6 @@ const ColorStockSchema = new mongoose.Schema<IColorStock>({
   },
   stock: { type: Number, required: true, default: 15, min: 0 },
 });
-
-interface IProduct extends Document {
-  name: string;
-  price: number;
-  description: string;
-  primaryImage: string;
-  secondaryImages: string[];
-  colorStocks: [IColorStock];
-  featured: boolean;
-  freeShipping: boolean;
-  averageRating: number;
-  numOfReviews: number;
-  categoryId: Schema.Types.ObjectId;
-  companyId: Schema.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 const ProductSchema = new mongoose.Schema<IProduct>(
   {
