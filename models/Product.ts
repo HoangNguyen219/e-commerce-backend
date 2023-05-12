@@ -8,7 +8,7 @@ export interface IColorStock extends Document {
   stock: Number;
 }
 
-interface IProduct extends Document {
+export interface IProduct extends Document {
   name: string;
   price: number;
   description: string;
@@ -44,7 +44,12 @@ const ColorStockSchema = new mongoose.Schema<IColorStock>({
       'blue',
     ],
   },
-  stock: { type: Number, required: true, default: 15, min: 0 },
+  stock: {
+    type: Number,
+    required: true,
+    default: 15,
+    min: [0, 'Stock can not be negative'],
+  },
 });
 
 const ProductSchema = new mongoose.Schema<IProduct>(
@@ -55,17 +60,20 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       unique: true,
       require: [true, 'Please provide product name'],
       maxLength: [100, 'Name can not be more than 100 characters'],
+      minlength: [1, 'Name must not contain only whitespace characters'],
     },
     price: {
       type: Number,
       required: [true, 'Please provide product price'],
-      min: 0,
+      min: [0, 'Price can not be negative'],
       default: 0,
     },
     description: {
       type: String,
+      trim: true,
       required: [true, 'Please provide product description'],
       maxlength: [1000, 'Description can not be more than 1000 characters'],
+      minlength: [1, 'Description must not contain only whitespace characters'],
     },
     primaryImage: {
       type: String,

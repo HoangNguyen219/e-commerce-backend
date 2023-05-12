@@ -14,8 +14,16 @@ const createProduct = async (req: Request, res: Response) => {
 };
 
 const getAllProducts = async (req: Request, res: Response) => {
-  const { categoryId, companyId, color, price, shipping, sort, text } =
-    req.query;
+  const {
+    categoryId,
+    companyId,
+    color,
+    price,
+    shipping,
+    featured,
+    sort,
+    text,
+  } = req.query;
   const queryObject: Record<string, any> = {};
 
   // add stuff based on condition
@@ -35,18 +43,19 @@ const getAllProducts = async (req: Request, res: Response) => {
     queryObject.price = { $lte: Number(price) };
   }
 
-  if (shipping) {
+  if (shipping && shipping !== 'all') {
     queryObject.freeShipping = shipping;
   }
 
+  if (featured && featured !== 'all') {
+    queryObject.featured = featured;
+  }
   if (text) {
     queryObject.$or = [
       { name: { $regex: text, $options: 'i' } },
       { description: { $regex: text, $options: 'i' } },
     ];
   }
-  console.log(queryObject);
-
   // NO AWAIT
   let result = Product.find(queryObject)
     .populate('categoryId')
@@ -110,6 +119,7 @@ const getSingleProduct = async (req: Request, res: Response) => {
 
 const updateProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
+  console.log(req.body);
 
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
     new: true,
@@ -159,9 +169,7 @@ const uploadImage = async (req: Request, res: Response) => {
       },
     );
     fs.unlinkSync(productImage.tempFilePath);
-    return res
-      .status(StatusCodes.OK)
-      .json({ image: { src: result.secure_url } });
+    return res.status(StatusCodes.OK).json({ image: result.secure_url });
   }
 };
 

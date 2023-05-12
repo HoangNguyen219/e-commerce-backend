@@ -1,8 +1,9 @@
 import mongoose, { Document } from 'mongoose';
-import Product from './Product';
+import Product, { IProduct } from './Product';
 
 interface ICategory extends Document {
   name: string;
+  products?: IProduct[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,11 +14,15 @@ const CategorySchema = new mongoose.Schema<ICategory>(
       type: String,
       unique: true,
       required: [true, 'Please provide name'],
-      minlength: 3,
+      minlength: [1, 'Name must not contain only whitespace characters'],
       maxlength: 50,
     },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 CategorySchema.virtual('products', {
@@ -27,8 +32,12 @@ CategorySchema.virtual('products', {
   justOne: false,
 });
 
-CategorySchema.pre('deleteOne', { document: true, query: false }, async function () {
-  await Product.deleteMany({ categoryId: this._id });
-});
+CategorySchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function () {
+    await Product.deleteMany({ categoryId: this._id });
+  },
+);
 
 export default mongoose.model<ICategory>('Category', CategorySchema);

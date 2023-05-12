@@ -13,11 +13,15 @@ const CompanySchema = new mongoose.Schema<ICompany>(
       type: String,
       unique: true,
       required: [true, 'Please provide name'],
-      minlength: 3,
+      minlength: [1, 'Name must not contain only whitespace characters'],
       maxlength: 50,
     },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 CompanySchema.virtual('products', {
@@ -27,8 +31,12 @@ CompanySchema.virtual('products', {
   justOne: false,
 });
 
-CompanySchema.pre('deleteOne', { document: true, query: false }, async function () {
-  await Product.deleteMany({ companyId: this._id });
-});
+CompanySchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function () {
+    await Product.deleteMany({ companyId: this._id });
+  },
+);
 
 export default mongoose.model<ICompany>('Company', CompanySchema);
