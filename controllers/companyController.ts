@@ -9,8 +9,42 @@ const createCompany = async (req: Request, res: Response) => {
 };
 
 const getAllCompanies = async (req: Request, res: Response) => {
-  const companies = await Company.find({});
-  res.status(StatusCodes.OK).json({ companies, count: companies.length });
+  const { sort, text } = req.query;
+  const queryObject: Record<string, any> = {};
+  if (text) {
+    queryObject.name = { $regex: text, $options: 'i' };
+  }
+
+  let result = Company.find(queryObject).populate('products');
+
+  if (sort === 'latest') {
+    result = result.sort('-createdAt');
+  }
+  if (sort === 'oldest') {
+    result = result.sort('createdAt');
+  }
+  if (sort === 'a-z') {
+    result = result.sort('name');
+  }
+  if (sort === 'z-a') {
+    result = result.sort('-name');
+  }
+
+  const companies = await result;
+
+  const companiesWithCount = companies.map(company => {
+    const { id, name, createdAt, updatedAt } = company;
+    return {
+      id,
+      name,
+      createdAt,
+      updatedAt,
+      productCount: company.products!.length,
+    };
+  });
+  res
+    .status(StatusCodes.OK)
+    .json({ companies: companiesWithCount, count: companies.length });
 };
 
 const getSingleCompany = async (req: Request, res: Response) => {

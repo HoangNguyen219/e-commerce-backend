@@ -1,8 +1,9 @@
 import mongoose, { Document } from 'mongoose';
-import Product from './Product';
+import Product, { IProduct } from './Product';
 
 interface ICompany extends Document {
   name: string;
+  products?: IProduct[];
   createdAt: Date;
   updatedAt: Date;
 }
