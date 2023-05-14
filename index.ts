@@ -25,12 +25,12 @@ cloudinaryV2.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-cloudinaryV2.api.resources(
-  { type: 'upload', prefix: 'NTH-Store/' },
-  function (error, result) {
-    console.log(result);
-  },
-);
+// cloudinaryV2.api.resources(
+//   { type: 'upload', prefix: 'NTH-Store/' },
+//   function (error, result) {
+//     console.log(result);
+//   },
+// );
 
 const app: Express = express();
 const port = process.env.PORT || 5000;

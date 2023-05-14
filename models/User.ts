@@ -66,7 +66,11 @@ const UserSchema = new mongoose.Schema<IUser>(
       default: 'user',
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 UserSchema.pre('save', async function () {

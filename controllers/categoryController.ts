@@ -15,7 +15,10 @@ const getAllCategories = async (req: Request, res: Response) => {
     queryObject.name = { $regex: text, $options: 'i' };
   }
 
-  let result = Category.find(queryObject).populate('products');
+  let result = Category.find(queryObject).populate({
+    path: 'products',
+    select: '_id',
+  });
 
   if (sort === 'latest') {
     result = result.sort('-createdAt');

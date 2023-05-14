@@ -4,7 +4,6 @@ import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import fs from 'fs';
 import cloudinary from 'cloudinary';
-import { log } from 'console';
 
 const cloudinaryV2 = cloudinary.v2;
 
@@ -57,9 +56,9 @@ const getAllProducts = async (req: Request, res: Response) => {
     ];
   }
   // NO AWAIT
-  let result = Product.find(queryObject)
-    .populate('categoryId')
-    .populate('companyId');
+  let result = Product.find(queryObject);
+  // .populate({ path: 'categoryId', select: 'name' })
+  // .populate({ path: 'companyId', select: 'name' });
 
   // chain sort conditions
   if (sort === 'latest') {
@@ -106,9 +105,13 @@ const getSingleProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
 
   const product = await Product.findOne({ _id: productId })
-    .populate('reviews')
-    .populate('categoryId')
-    .populate('companyId');
+    .populate({
+      path: 'reviews',
+      populate: { path: 'userId', select: 'name' },
+      options: { sort: { createdAt: 'desc' } },
+    })
+    .populate({ path: 'categoryId', select: 'name' })
+    .populate({ path: 'companyId', select: 'name' });
 
   if (!product) {
     throw new NotFoundError(`No product with id: ${productId}`);
@@ -119,7 +122,6 @@ const getSingleProduct = async (req: Request, res: Response) => {
 
 const updateProduct = async (req: Request, res: Response) => {
   const { id: productId } = req.params;
-  console.log(req.body);
 
   const product = await Product.findOneAndUpdate({ _id: productId }, req.body, {
     new: true,

@@ -3,7 +3,6 @@ import Product from './Product';
 
 interface IReview extends Document {
   rating: Number;
-  title: string;
   comment: string;
   userId: Schema.Types.ObjectId;
   productId: Schema.Types.ObjectId;
@@ -23,12 +22,6 @@ const ReviewSchema = new Schema<IReview, ReviewModel>(
       max: 5,
       required: [true, 'Please provide rating'],
     },
-    title: {
-      type: String,
-      trim: true,
-      required: [true, 'Please provide review title'],
-      maxlength: 100,
-    },
     comment: {
       type: String,
       required: [true, 'Please provide review text'],
@@ -46,11 +39,15 @@ const ReviewSchema = new Schema<IReview, ReviewModel>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
-ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
+ReviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
 
-ReviewSchema.statics.calculateAverageRating = async function (productId: ObjectId) {
+ReviewSchema.statics.calculateAverageRating = async function (
+  productId: ObjectId,
+) {
   const result = await this.aggregate([
     { $match: { productId: productId } },
     {
@@ -76,11 +73,19 @@ ReviewSchema.statics.calculateAverageRating = async function (productId: ObjectI
 };
 
 ReviewSchema.post('save', async function (doc) {
-  mongoose.model<IReview, ReviewModel>('Review', ReviewSchema).calculateAverageRating(doc.productId);
+  mongoose
+    .model<IReview, ReviewModel>('Review', ReviewSchema)
+    .calculateAverageRating(doc.productId);
 });
 
-ReviewSchema.post('deleteOne', { document: true, query: true }, async function (doc) {
-  mongoose.model<IReview, ReviewModel>('Review', ReviewSchema).calculateAverageRating(doc.productId);
-});
+ReviewSchema.post(
+  'deleteOne',
+  { document: true, query: true },
+  async function (doc) {
+    mongoose
+      .model<IReview, ReviewModel>('Review', ReviewSchema)
+      .calculateAverageRating(doc.productId);
+  },
+);
 
 export default mongoose.model<IReview, ReviewModel>('Review', ReviewSchema);

@@ -15,7 +15,10 @@ const getAllCompanies = async (req: Request, res: Response) => {
     queryObject.name = { $regex: text, $options: 'i' };
   }
 
-  let result = Company.find(queryObject).populate('products');
+  let result = Company.find(queryObject).populate({
+    path: 'products',
+    select: '_id',
+  });
 
   if (sort === 'latest') {
     result = result.sort('-createdAt');
