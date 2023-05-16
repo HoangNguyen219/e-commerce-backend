@@ -16,7 +16,7 @@ const fakeStripeAPI = async ({ amount, currency }: PaymentData) => {
 };
 
 const createOrder = async (req: Request, res: Response) => {
-  const { cartItems, tax, shippingFee } = req.body;
+  const { cartItems, shippingFee } = req.body;
 
   if (!cartItems || cartItems.length < 1) {
     throw new BadRequestError('No cart items provided');
@@ -41,7 +41,7 @@ const createOrder = async (req: Request, res: Response) => {
     subtotal += item.itemTotal;
   }
   // calculate total
-  const total = tax + shippingFee + subtotal;
+  const total = shippingFee + subtotal;
   // get client secret
   const paymentIntent = await fakeStripeAPI({
     amount: total,
@@ -52,13 +52,14 @@ const createOrder = async (req: Request, res: Response) => {
     orderItems,
     total,
     subtotal,
-    tax,
     shippingFee,
     clientSecret: paymentIntent.client_secret,
     user: req.user.id,
   });
 
-  res.status(StatusCodes.CREATED).json({ order, clientSecret: order.clientSecret });
+  res
+    .status(StatusCodes.CREATED)
+    .json({ order, clientSecret: order.clientSecret });
 };
 
 const getAllOrders = async (req: Request, res: Response) => {
@@ -98,4 +99,10 @@ const updateOrder = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ order });
 };
 
-export { getAllOrders, getSingleOrder, getCurrentUserOrders, createOrder, updateOrder };
+export {
+  getAllOrders,
+  getSingleOrder,
+  getCurrentUserOrders,
+  createOrder,
+  updateOrder,
+};
