@@ -25,6 +25,7 @@ async function setDefaultAddress(address: IAddress, userId: string) {
 
   if (existingDefaultAddress) {
     existingDefaultAddress.isDefault = false;
+    existingDefaultAddress.markModified('isDefault');
     await existingDefaultAddress.save();
   }
 
@@ -39,7 +40,9 @@ const getAllAddresses = async (req: Request, res: Response) => {
 };
 
 const getCurrentUserAddresses = async (req: Request, res: Response) => {
-  const addresses = await Address.find({ userId: req.user.id });
+  const addresses = await Address.find({ userId: req.user.id }).sort(
+    '-createdAt',
+  );
   res.status(StatusCodes.OK).json({ addresses, count: addresses.length });
 };
 
@@ -57,7 +60,8 @@ const getSingleAddress = async (req: Request, res: Response) => {
 
 const updateAddress = async (req: Request, res: Response) => {
   const { id: addressId } = req.params;
-  const address = await Address.findOne({ _id: addressId });
+  const { isDefault } = req.body;
+  let address = await Address.findOne({ _id: addressId });
 
   if (!address) {
     throw new NotFoundError(`No address with id: ${addressId}`);
@@ -65,10 +69,15 @@ const updateAddress = async (req: Request, res: Response) => {
 
   checkPermissions(req.user, address.userId);
 
-  await Address.findOneAndUpdate({ _id: addressId }, req.body, {
+  address = await Address.findOneAndUpdate({ _id: addressId }, req.body, {
     new: true,
     runValidators: true,
   });
+
+  if (isDefault) {
+    await setDefaultAddress(address!, req.user.id);
+  }
+
   res.status(StatusCodes.OK).json({ address });
 };
 

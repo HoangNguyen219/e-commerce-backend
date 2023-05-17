@@ -14,6 +14,7 @@ import categoryRouter from './routes/categoryRoutes';
 import companyRouter from './routes/companyRoutes';
 import reviewRouter from './routes/reviewRoutes';
 import orderRouter from './routes/orderRoutes';
+import addressRouter from './routes/addressRoute';
 import cloudinary from 'cloudinary';
 
 dotenv.config();
@@ -51,6 +52,7 @@ app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/companies', companyRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/addresses', addressRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

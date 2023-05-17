@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface ISingleOrderItem extends Document {
   color: string;
   price: Number;
-  quantity: Number;
+  amount: Number;
   itemTotal: Number;
   productId: Schema.Types.ObjectId;
 }
@@ -11,7 +11,7 @@ export interface ISingleOrderItem extends Document {
 const SingleOrderItemSchema = new mongoose.Schema<ISingleOrderItem>({
   color: { type: String, required: true },
   price: { type: Number, required: true },
-  quantity: { type: Number, required: true },
+  amount: { type: Number, required: true },
   itemTotal: { type: Number, required: true },
   productId: {
     type: Types.ObjectId,
@@ -27,8 +27,8 @@ interface IOrder extends Document {
   orderItems: [Schema<ISingleOrderItem>];
   status: string;
   userId: Schema.Types.ObjectId;
-  clientSecret: string;
-  paymentIntentId: string;
+  addressId: Schema.Types.ObjectId;
+  paymentMethod: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,15 +58,22 @@ const OrderSchema = new mongoose.Schema<IOrder>(
       ref: 'User',
       required: true,
     },
-    clientSecret: {
-      type: String,
+    addressId: {
+      type: Types.ObjectId,
+      ref: 'Address',
       required: true,
     },
-    paymentIntentId: {
+    paymentMethod: {
       type: String,
+      enum: ['COD', 'PAYPAL'],
+      required: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 export default mongoose.model<IOrder>('Order', OrderSchema);
