@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Types, ObjectId, Model } from 'mongoose';
 import Product from './Product';
+import User from './User';
 
 interface IReview extends Document {
   rating: Number;
@@ -30,11 +31,33 @@ const ReviewSchema = new Schema<IReview, ReviewModel>(
       type: Types.ObjectId,
       ref: 'User',
       required: true,
+      validate: {
+        validator: async function (value: string) {
+          try {
+            const user = await User.findById(value);
+            return user !== null;
+          } catch (err) {
+            return false;
+          }
+        },
+        message: props => `${props.value} is not a valid user Id`,
+      },
     },
     productId: {
       type: Types.ObjectId,
       ref: 'Product',
       required: true,
+      validate: {
+        validator: async function (value: string) {
+          try {
+            const product = await Product.findById(value);
+            return product !== null;
+          } catch (err) {
+            return false;
+          }
+        },
+        message: props => `${props.value} is not a valid product Id`,
+      },
     },
   },
   {

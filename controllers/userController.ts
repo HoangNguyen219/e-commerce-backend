@@ -31,16 +31,15 @@ const getSingleUser = async (req: Request, res: Response) => {
 const showCurrentUser = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ user: req.user });
 };
-// update user with user.save()
+
 const updateUser = async (req: Request, res: Response) => {
-  const { email, username } = req.body;
-  if (!email || !username) {
+  const { name } = req.body;
+  if (!name) {
     throw new BadRequestError(Message.PLEASE_PROVIDE_ALL_VALUES);
   }
   const user = await User.findOne({ _id: req.user.id });
 
-  user!.email = email;
-  user!.name = username;
+  user!.name = name;
 
   await user!.save();
 
@@ -56,13 +55,13 @@ const updateUserPassword = async (req: Request, res: Response) => {
   }
   const user = await User.findOne({ _id: req.user.id });
 
-  const isPasswordCorrect = await user!.comparePassword(oldPassword);
-  if (!isPasswordCorrect) {
-    throw new UnauthenticatedError(Message.INVALID_CREDENTIALS);
-  }
-
   if (newPassword !== confirmPassword) {
     throw new BadRequestError(Message.PASSWORD_DO_NOT_MATCH);
+  }
+
+  const isPasswordCorrect = await user!.comparePassword(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new BadRequestError(Message.INVALID_CREDENTIALS);
   }
 
   user!.password = newPassword;

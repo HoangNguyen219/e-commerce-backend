@@ -28,7 +28,6 @@ export interface IProduct extends Document {
 const ColorStockSchema = new mongoose.Schema<IColorStock>({
   color: {
     type: String,
-    default: 'black',
     required: true,
     enum: [
       'black',
