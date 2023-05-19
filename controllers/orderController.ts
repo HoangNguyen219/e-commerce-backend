@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import { checkPermissions } from '../utils';
+import User, { IUser } from '../models/User';
 
 const createOrder = async (req: Request, res: Response) => {
   const { cartItems, shippingFee, addressId, paymentMethod } = req.body;
@@ -26,7 +27,7 @@ const createOrder = async (req: Request, res: Response) => {
   // calculate total
   const total = shippingFee + subtotal;
   let paymentStatus = 'unpaid';
-  if (paymentMethod === 'PAYPAL') {
+  if (paymentMethod === 'paypal') {
     paymentStatus = 'paid';
   }
   const order = await Order.create({
@@ -44,8 +45,68 @@ const createOrder = async (req: Request, res: Response) => {
 };
 
 const getAllOrders = async (req: Request, res: Response) => {
-  const orders = await Order.find({});
-  res.status(StatusCodes.OK).json({ orders, count: orders.length });
+  const { sort, total, processStatus, paymentMethod, paymentStatus, customer } =
+    req.query;
+  const queryObject: Record<string, any> = {};
+
+  if (processStatus && processStatus !== 'all') {
+    queryObject.processStatus = processStatus;
+  }
+
+  if (paymentMethod && paymentMethod !== 'all') {
+    queryObject.paymentMethod = paymentMethod;
+  }
+
+  if (paymentStatus && paymentStatus !== 'all') {
+    queryObject.paymentStatus = paymentStatus;
+  }
+
+  if (total) {
+    queryObject.total = { $lte: Number(total) };
+  }
+
+  if (customer) {
+    let user: IUser[] = [];
+    let userQueryObject: Record<string, any> = {};
+    userQueryObject.$or = [
+      { name: { $regex: customer, $options: 'i' } },
+      { email: { $regex: customer, $options: 'i' } },
+    ];
+    user = await User.find(userQueryObject).select('id');
+    queryObject.userId = { $in: user.map(u => u.id) };
+  }
+
+  let result = Order.find(queryObject).populate({
+    path: 'userId',
+    select: 'name email',
+  });
+  // chain sort conditions
+  if (sort === 'latest') {
+    result = result.sort('-createdAt');
+  }
+  if (sort === 'oldest') {
+    result = result.sort('createdAt');
+  }
+  if (sort === 'total-lowest') {
+    result = result.sort('total');
+  }
+  if (sort === 'total-highest') {
+    result = result.sort('-total');
+  }
+
+  // setup pagination
+  const page = Number(req.query.page) || 1;
+  let limit = Number(req.query.limit) || 10;
+  limit = limit > 10 ? 10 : limit;
+  const skip = (page - 1) * limit;
+
+  result = result.skip(skip).limit(limit);
+
+  const orders = await result.exec();
+
+  const totalOrders = await Order.countDocuments(queryObject);
+  const numOfPages = Math.ceil(totalOrders / limit);
+  res.status(StatusCodes.OK).json({ orders, totalOrders, numOfPages });
 };
 
 const getSingleOrder = async (req: Request, res: Response) => {
@@ -74,7 +135,26 @@ const updateOrder = async (req: Request, res: Response) => {
   }
   checkPermissions(req.user, order.userId);
 
-  order.paymentStatus = 'paid';
+  const { processStatus } = req.body;
+  let paymentStatus = '';
+  switch (processStatus) {
+    case 'delivered':
+      paymentStatus = 'paid';
+      break;
+    case 'canceled':
+      paymentStatus = 'canceled';
+      break;
+    case 'returned':
+      paymentStatus = 'refunded';
+      break;
+    default:
+      break;
+  }
+  if (paymentStatus) {
+    order.paymentStatus = paymentStatus;
+  }
+  order.processStatus = processStatus;
+
   await order.save();
 
   res.status(StatusCodes.OK).json({ order });

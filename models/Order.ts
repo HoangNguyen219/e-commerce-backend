@@ -86,14 +86,14 @@ const OrderSchema = new mongoose.Schema<IOrder>(
         'processing',
         'shipped',
         'delivered',
-        'cancelled',
+        'canceled',
         'returned',
       ],
       default: 'pending',
     },
     paymentStatus: {
       type: String,
-      enum: ['paid', 'unpaid', 'refunded'],
+      enum: ['paid', 'unpaid', 'canceled', 'refunded'],
       default: 'unpaid',
     },
     userId: {
@@ -130,7 +130,7 @@ const OrderSchema = new mongoose.Schema<IOrder>(
     },
     paymentMethod: {
       type: String,
-      enum: ['COD', 'PAYPAL'],
+      enum: ['cod', 'paypal'],
       required: true,
     },
   },

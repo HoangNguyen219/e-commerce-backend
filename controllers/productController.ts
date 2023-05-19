@@ -57,8 +57,6 @@ const getAllProducts = async (req: Request, res: Response) => {
   }
   // NO AWAIT
   let result = Product.find(queryObject);
-  // .populate({ path: 'categoryId', select: 'name' })
-  // .populate({ path: 'companyId', select: 'name' });
 
   // chain sort conditions
   if (sort === 'latest') {
