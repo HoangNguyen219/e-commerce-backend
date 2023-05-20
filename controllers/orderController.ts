@@ -97,7 +97,6 @@ const getAllOrders = async (req: Request, res: Response) => {
   // setup pagination
   const page = Number(req.query.page) || 1;
   let limit = Number(req.query.limit) || 10;
-  limit = limit > 10 ? 10 : limit;
   const skip = (page - 1) * limit;
 
   result = result.skip(skip).limit(limit);

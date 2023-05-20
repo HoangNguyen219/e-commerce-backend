@@ -1,6 +1,8 @@
 import mongoose, { Document } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
+import { IOrder } from './Order';
+import { IReview } from './Review';
 
 export interface ITokenUser {
   id: string;
@@ -13,7 +15,10 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'user';
+  role: string;
+  orders?: IOrder[];
+  reviews?: IReview[];
+
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -73,6 +78,20 @@ const UserSchema = new mongoose.Schema<IUser>(
     toObject: { virtuals: true },
   },
 );
+
+UserSchema.virtual('orders', {
+  ref: 'Order',
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: false,
+});
+
+UserSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: false,
+});
 
 UserSchema.pre('save', async function () {
   if (!this.isModified('password')) return;

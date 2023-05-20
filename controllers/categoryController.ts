@@ -45,6 +45,15 @@ const getAllCategories = async (req: Request, res: Response) => {
       productCount: category.products!.length,
     };
   });
+
+  if (sort === 'product-lowest') {
+    categoriesWithCount.sort((a, b) => a.productCount - b.productCount); // Sort by productCount in DES order
+  }
+
+  if (sort === 'product-highest') {
+    categoriesWithCount.sort((a, b) => b.productCount - a.productCount); // Sort by productCount in ASC order
+  }
+
   res
     .status(StatusCodes.OK)
     .json({ categories: categoriesWithCount, count: categories.length });

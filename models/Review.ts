@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types, ObjectId, Model } from 'mongoose';
 import Product from './Product';
 import User from './User';
 
-interface IReview extends Document {
+export interface IReview extends Document {
   rating: Number;
   comment: string;
   userId: Schema.Types.ObjectId;

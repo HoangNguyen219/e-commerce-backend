@@ -50,7 +50,7 @@ const SingleOrderItemSchema = new mongoose.Schema<ISingleOrderItem>({
   },
 });
 
-interface IOrder extends Document {
+export interface IOrder extends Document {
   shippingFee: Number;
   subtotal: Number;
   total: Number;

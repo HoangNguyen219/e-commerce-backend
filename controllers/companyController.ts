@@ -45,6 +45,15 @@ const getAllCompanies = async (req: Request, res: Response) => {
       productCount: company.products!.length,
     };
   });
+
+  if (sort === 'product-lowest') {
+    companiesWithCount.sort((a, b) => a.productCount - b.productCount); // Sort by productCount in DES order
+  }
+
+  if (sort === 'product-highest') {
+    companiesWithCount.sort((a, b) => b.productCount - a.productCount); // Sort by productCount in ASC order
+  }
+
   res
     .status(StatusCodes.OK)
     .json({ companies: companiesWithCount, count: companies.length });

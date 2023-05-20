@@ -1,11 +1,7 @@
 import User from '../models/User';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import {
-  BadRequestError,
-  UnauthenticatedError,
-  NotFoundError,
-} from '../errors';
+import { BadRequestError, NotFoundError } from '../errors';
 import {
   createTokenUser,
   attachCookiesToResponse,
@@ -14,9 +10,85 @@ import {
 import { Message, Role } from '../utils/enum';
 
 const getAllUsers = async (req: Request, res: Response) => {
-  console.log(req.user);
-  const users = await User.find({ role: Role.User }).select('-password');
-  res.status(StatusCodes.OK).json({ users });
+  const { sort, customer } = req.query;
+
+  const queryObject: Record<string, any> = {};
+  // queryObject.role = Role.User;
+
+  if (customer) {
+    queryObject.$or = [
+      { name: { $regex: customer, $options: 'i' } },
+      { email: { $regex: customer, $options: 'i' } },
+    ];
+  }
+
+  let result = User.find(queryObject)
+    .select('-password')
+    .populate({
+      path: 'orders',
+      select: 'id',
+    })
+    .populate({
+      path: 'reviews',
+      select: 'id',
+    });
+
+  if (sort === 'latest') {
+    result = result.sort('-createdAt');
+  }
+  if (sort === 'oldest') {
+    result = result.sort('createdAt');
+  }
+  if (sort === 'a-z') {
+    result = result.sort('name');
+  }
+  if (sort === 'z-a') {
+    result = result.sort('-name');
+  }
+
+  // setup pagination
+  const page = Number(req.query.page) || 1;
+  let limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  result = result.skip(skip).limit(limit);
+
+  const users = await result.exec();
+
+  const usersWithCount = users.map(user => {
+    const { id, name, email, createdAt, updatedAt } = user;
+    return {
+      id,
+      name,
+      email,
+      createdAt,
+      updatedAt,
+      ordersCount: user.orders!.length,
+      reviewsCount: user.reviews!.length,
+    };
+  });
+
+  if (sort === 'order-lowest') {
+    usersWithCount.sort((a, b) => a.ordersCount - b.ordersCount);
+  }
+
+  if (sort === 'order-highest') {
+    usersWithCount.sort((a, b) => b.ordersCount - a.ordersCount);
+  }
+
+  if (sort === 'review-lowest') {
+    usersWithCount.sort((a, b) => a.reviewsCount - b.reviewsCount);
+  }
+
+  if (sort === 'review-highest') {
+    usersWithCount.sort((a, b) => b.reviewsCount - a.reviewsCount);
+  }
+
+  const totalUsers = await User.countDocuments(queryObject);
+  const numOfPages = Math.ceil(totalUsers / limit);
+  res
+    .status(StatusCodes.OK)
+    .json({ users: usersWithCount, totalUsers, numOfPages });
 };
 
 const getSingleUser = async (req: Request, res: Response) => {
