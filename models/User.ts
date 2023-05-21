@@ -18,7 +18,11 @@ export interface IUser extends Document {
   role: string;
   orders?: IOrder[];
   reviews?: IReview[];
-
+  verificationToken: string;
+  verified: Date;
+  isVerified: boolean;
+  passwordToken?: string;
+  passwordTokenExpirationDate?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -70,6 +74,18 @@ const UserSchema = new mongoose.Schema<IUser>(
       type: String,
       enum: ['admin', 'user'],
       default: 'user',
+    },
+    verificationToken: String,
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verified: Date,
+    passwordToken: {
+      type: String,
+    },
+    passwordTokenExpirationDate: {
+      type: Date,
     },
   },
   {
