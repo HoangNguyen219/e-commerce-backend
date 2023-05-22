@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import { checkPermissions } from '../utils';
 import User, { IUser } from '../models/User';
+import moment from 'moment';
 
 const createOrder = async (req: Request, res: Response) => {
   const { cartItems, shippingFee, addressId, paymentMethod } = req.body;
@@ -138,6 +139,7 @@ const updateOrder = async (req: Request, res: Response) => {
   let paymentStatus = '';
   switch (processStatus) {
     case 'delivered':
+    case 'completed':
       paymentStatus = 'paid';
       break;
     case 'canceled':
@@ -159,10 +161,152 @@ const updateOrder = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ order });
 };
 
+const showStats = async (req: Request, res: Response) => {
+  const { startDateStr, endDateStr } = req.query;
+  const startDate =
+    startDateStr && typeof startDateStr === 'string'
+      ? new Date(startDateStr)
+      : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const endDate =
+    endDateStr && typeof endDateStr === 'string'
+      ? new Date(Date.parse(endDateStr) + 1 * 24 * 60 * 60 * 1000)
+      : new Date();
+
+  console.log(startDate);
+  console.log(endDate);
+  console.log(new Date());
+
+  let revenue = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate, $lte: endDate },
+        processStatus: 'completed',
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+          day: { $dayOfMonth: '$createdAt' },
+        },
+        totalRevenue: { $sum: '$total' },
+        totalCompletedOrders: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 },
+    },
+  ]);
+
+  revenue = revenue.map(item => {
+    const {
+      _id: { year, month, day },
+      totalRevenue,
+      totalCompletedOrders,
+    } = item;
+    const date = moment()
+      .month(month - 1)
+      .year(year)
+      .date(day)
+      .format('MMM DD YYYY');
+    return { date, totalRevenue, totalCompletedOrders };
+  });
+
+  const popularProducts = await Order.aggregate([
+    {
+      $match: {
+        processStatus: 'completed',
+        createdAt: { $gte: startDate, $lte: endDate },
+      },
+    },
+    {
+      $unwind: '$orderItems', // Unwind the orderItems array
+    },
+    {
+      $group: {
+        _id: '$orderItems.productId',
+        sold: { $sum: '$orderItems.amount' },
+        revenue: { $sum: '$orderItems.itemTotal' },
+      },
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: '_id',
+        foreignField: '_id',
+        pipeline: [
+          { $project: { name: 1, price: 1, primaryImage: 1 } }, // Select the desired fields
+        ],
+        as: 'product',
+      },
+    },
+
+    {
+      $sort: { sold: 1 },
+    },
+    {
+      $limit: 7,
+    },
+  ]);
+
+  interface STATS {
+    uncompleted: number;
+    completed: number;
+    failed: number;
+  }
+
+  let statsOrders = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate, $lte: endDate },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $cond: {
+            if: {
+              $in: [
+                '$processStatus',
+                ['pending', 'processing', 'shipped', 'delivered'],
+              ],
+            },
+            then: 'uncompleted',
+            else: {
+              $cond: {
+                if: { $in: ['$processStatus', ['completed']] },
+                then: 'completed',
+                else: 'failed',
+              },
+            },
+          },
+        },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  let stats: STATS = statsOrders.reduce((acc, curr) => {
+    const { _id: title, count } = curr;
+    acc[title] = count;
+    return acc;
+  }, {});
+
+  stats = {
+    uncompleted: stats.uncompleted || 0,
+    completed: stats.completed || 0,
+    failed: stats.failed || 0,
+  };
+
+  res.status(StatusCodes.OK).json({ revenue, popularProducts, stats });
+};
+
 export {
   getAllOrders,
   getSingleOrder,
   getCurrentUserOrders,
   createOrder,
   updateOrder,
+  showStats,
 };

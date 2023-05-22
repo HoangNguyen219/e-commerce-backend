@@ -86,7 +86,7 @@ ReviewSchema.statics.calculateAverageRating = async function (
     await Product.findOneAndUpdate(
       { _id: productId },
       {
-        averageRating: Math.ceil(result[0]?.averageRating || 0),
+        averageRating: Number((result[0]?.averageRating || 0).toFixed(1)),
         numOfReviews: result[0]?.numOfReviews || 0,
       },
     );

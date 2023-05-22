@@ -11,6 +11,7 @@ import {
   getCurrentUserOrders,
   createOrder,
   updateOrder,
+  showStats,
 } from '../controllers/orderController';
 
 router
@@ -19,7 +20,9 @@ router
   .get(authenticateUser, authorizePermissions('admin'), getAllOrders);
 
 router.route('/showAllMyOrders').get(authenticateUser, getCurrentUserOrders);
-
+router
+  .route('/stats')
+  .get(authenticateUser, authorizePermissions('admin'), showStats);
 router
   .route('/:id')
   .get(authenticateUser, getSingleOrder)
