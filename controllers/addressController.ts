@@ -74,6 +74,10 @@ const updateAddress = async (req: Request, res: Response) => {
     runValidators: true,
   });
 
+  address!.isDefault = false;
+  address!.markModified('isDefault');
+  await address!.save();
+
   if (isDefault) {
     await setDefaultAddress(address!, req.user.id);
   }

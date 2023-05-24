@@ -7,7 +7,9 @@ export interface IAddress extends Document {
   address: string;
   city: string;
   state: string;
+  stateCode: string;
   country: string;
+  countryCode: string;
   isDefault: boolean;
   userId: Schema.Types.ObjectId;
   createdAt: Date;
@@ -50,11 +52,19 @@ const AddressSchema = new mongoose.Schema<IAddress>(
       minlength: [1, 'State must not contain only whitespace characters'],
       maxlength: 50,
     },
+    stateCode: {
+      type: String,
+      required: [true, 'Please provide stateCode'],
+    },
     country: {
       type: String,
       required: [true, 'Please provide country'],
       minlength: [1, 'Country must not contain only whitespace characters'],
       maxlength: 50,
+    },
+    countryCode: {
+      type: String,
+      required: [true, 'Please provide countryCode'],
     },
     isDefault: {
       type: Boolean,
