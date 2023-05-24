@@ -16,7 +16,6 @@ export interface IProduct extends Document {
   secondaryImages: string[];
   colorStocks: [IColorStock];
   featured: boolean;
-  freeShipping: boolean;
   averageRating: number;
   numOfReviews: number;
   categoryId: Schema.Types.ObjectId;
@@ -96,10 +95,6 @@ const ProductSchema = new mongoose.Schema<IProduct>(
       },
     },
     featured: {
-      type: Boolean,
-      default: false,
-    },
-    freeShipping: {
       type: Boolean,
       default: false,
     },

@@ -42,4 +42,17 @@ const ConfigSchema = new mongoose.Schema<IConfig>(
   },
 );
 
+ConfigSchema.pre('save', async function () {
+  if (!this.isModified('dataType')) return;
+  switch (this.dataType) {
+    case 'Number':
+      this.value = parseInt(this.value);
+      break;
+    case 'Boolean':
+      this.value = Boolean(this.value);
+    default:
+      this.value = this.value.toString();
+  }
+});
+
 export default mongoose.model<IConfig>('Config', ConfigSchema);

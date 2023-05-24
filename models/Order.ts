@@ -4,6 +4,8 @@ import User from './User';
 import Product from './Product';
 
 export interface ISingleOrderItem extends Document {
+  name: string;
+  image: string;
   color: string;
   price: Number;
   amount: Number;
@@ -12,6 +14,8 @@ export interface ISingleOrderItem extends Document {
 }
 
 const SingleOrderItemSchema = new mongoose.Schema<ISingleOrderItem>({
+  name: { type: String, required: true },
+  image: { type: String, required: true },
   color: {
     type: String,
     required: true,

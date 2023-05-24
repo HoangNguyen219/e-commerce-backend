@@ -1,5 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
+import { ClientSession } from 'mongoose';
+
+let currentSession: ClientSession | null = null;
+
+export const setCurrentSession = (session: ClientSession | null) => {
+  currentSession = session;
+};
 
 const errorHandlerMiddleware = (
   err: any,
@@ -7,6 +14,12 @@ const errorHandlerMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
+  if (currentSession) {
+    // End the session
+    currentSession.endSession();
+    currentSession = null;
+  }
+
   let customError = {
     // set default
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,

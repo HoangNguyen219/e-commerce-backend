@@ -17,8 +17,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .all([authenticateUser, authorizePermissions(Role.Admin)])
-  .post(createConfig)
+  .post([authenticateUser, authorizePermissions(Role.Admin)], createConfig)
   .get(getAllConfigs);
 
 router

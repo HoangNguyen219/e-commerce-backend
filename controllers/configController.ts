@@ -4,8 +4,6 @@ import { StatusCodes } from 'http-status-codes';
 import { NotFoundError } from '../errors';
 
 const createConfig = async (req: Request, res: Response) => {
-  const { value, dataType } = req.body;
-
   const config = await Config.create(req.body);
   res.status(StatusCodes.CREATED).json({ config });
 };
@@ -38,6 +36,11 @@ const updateConfig = async (req: Request, res: Response) => {
   if (!config) {
     throw new NotFoundError(`No config with id: ${id}`);
   }
+
+  const { dataType } = req.body;
+  config.dataType = dataType;
+  config.markModified('dataType');
+  await config.save();
 
   res.status(StatusCodes.OK).json({ config });
 };

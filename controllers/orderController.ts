@@ -5,33 +5,74 @@ import { BadRequestError, NotFoundError } from '../errors';
 import { checkPermissions } from '../utils';
 import User, { IUser } from '../models/User';
 import moment from 'moment';
+import Config from '../models/Config';
+import Product from '../models/Product';
+import { startSession } from 'mongoose';
+import { setCurrentSession } from '../middlewares/error-handler';
 
 const createOrder = async (req: Request, res: Response) => {
-  const { cartItems, shippingFee, addressId, paymentMethod } = req.body;
+  const { cartItems, addressId, paymentMethod } = req.body;
 
   if (!cartItems || cartItems.length < 1) {
     throw new BadRequestError('No cart items provided');
   }
+  const [shippingFeeConfig, minFreeShippingAmountConfig] = await Promise.all([
+    Config.findOne({ name: 'ShippingFee' }),
+    Config.findOne({ name: 'MinFreeShippingAmount' }),
+  ]);
 
-  if (!shippingFee) {
-    throw new BadRequestError('Please provide shippingFee');
-  }
+  let shippingFee = shippingFeeConfig?.value || 0;
+  const minFreeShippingAmount = minFreeShippingAmountConfig?.value || 0;
 
   let orderItems: ISingleOrderItem[] = [];
   let subtotal = 0;
 
+  const session = await startSession();
+  session.startTransaction();
+  setCurrentSession(session);
+
   for (const item of cartItems) {
-    item.itemTotal = item.price * item.amount;
-    orderItems = [...orderItems, item];
+    const { productId, color, amount } = item;
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new BadRequestError(`Product with id ${productId} not found`);
+    }
+    const colorStock = product.colorStocks.find(cs => cs.color === color);
+    if (!colorStock) {
+      throw new BadRequestError(
+        `Product with id ${productId} does not have color ${color}.`,
+      );
+    }
+    if (amount > colorStock.stock) {
+      throw new BadRequestError(
+        `Product ${product.name} with color (${color}) is insufficient stock`,
+      );
+    }
+    item.itemTotal = product.price * item.amount;
+    item.price = product.price;
+    item.image = product.primaryImage;
+    item.name = product.name;
+    orderItems.push(item);
     subtotal += item.itemTotal;
+    colorStock.stock = Number(colorStock.stock) - Number(amount);
+    await product.save({ session });
   }
   // calculate total
-  const total = shippingFee + subtotal;
+  let total = subtotal;
+
+  if (minFreeShippingAmountConfig?.status && total >= minFreeShippingAmount) {
+    shippingFee = 0;
+  }
+
+  if (shippingFeeConfig?.status) {
+    total += shippingFee;
+  }
+
   let paymentStatus = 'unpaid';
   if (paymentMethod === 'paypal') {
     paymentStatus = 'paid';
   }
-  const order = await Order.create({
+  const order = new Order({
     orderItems,
     total,
     subtotal,
@@ -41,6 +82,9 @@ const createOrder = async (req: Request, res: Response) => {
     paymentStatus,
     userId: req.user.id,
   });
+  await order.save({ session });
+  await session.commitTransaction();
+  setCurrentSession(null);
 
   res.status(StatusCodes.CREATED).json({ order });
 };
@@ -111,9 +155,7 @@ const getAllOrders = async (req: Request, res: Response) => {
 
 const getSingleOrder = async (req: Request, res: Response) => {
   const { id: orderId } = req.params;
-  const order = await Order.findOne({ _id: orderId })
-    .populate('addressId')
-    .populate({ path: 'orderItems.productId', select: 'name id primaryImage' });
+  const order = await Order.findOne({ _id: orderId }).populate('addressId');
   if (!order) {
     throw new NotFoundError(`No order with id : ${orderId}`);
   }

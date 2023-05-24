@@ -13,16 +13,8 @@ const createProduct = async (req: Request, res: Response) => {
 };
 
 const getAllProducts = async (req: Request, res: Response) => {
-  const {
-    categoryId,
-    companyId,
-    color,
-    price,
-    shipping,
-    featured,
-    sort,
-    text,
-  } = req.query;
+  const { categoryId, companyId, color, price, featured, sort, text } =
+    req.query;
   const queryObject: Record<string, any> = {};
 
   // add stuff based on condition
@@ -40,10 +32,6 @@ const getAllProducts = async (req: Request, res: Response) => {
 
   if (price) {
     queryObject.price = { $lte: Number(price) };
-  }
-
-  if (shipping && shipping !== 'all') {
-    queryObject.freeShipping = shipping;
   }
 
   if (featured && featured !== 'all') {
