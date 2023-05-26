@@ -3,9 +3,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
 import fs from 'fs';
-import cloudinary from 'cloudinary';
-
-const cloudinaryV2 = cloudinary.v2;
+import cloudinaryV2 from '../service/cloudinary';
 
 const createProduct = async (req: Request, res: Response) => {
   const product = await Product.create(req.body);
