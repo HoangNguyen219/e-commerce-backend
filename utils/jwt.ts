@@ -9,6 +9,7 @@ const attachCookiesToResponse = (res: Response, user: ITokenUser) => {
     maxAge: 1000 * 60 * 60 * 24, // 1d
     secure: process.env.NODE_ENV === 'production',
     signed: true,
+    sameSite: 'none',
   });
 };
 

@@ -2,6 +2,9 @@ import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import 'express-async-errors';
 import morgan from 'morgan';
+import cors from 'cors';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import connectDB from './db/connect';
@@ -40,8 +43,24 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(morgan('tiny'));
+
+const allowedOrigins = [process.env.ORIGIN, process.env.ADMIN_ORIGIN];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
+app.use(mongoSanitize());
 app.use(cookieParser(process.env.JWT_SECRET));
 
 app.use(express.static('./public'));
