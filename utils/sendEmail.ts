@@ -8,8 +8,6 @@ interface mail {
 }
 
 const sendEmail = async ({ to, subject, html }: mail) => {
-  // let testAccount = await nodemailer.createTestAccount();
-
   const transporter = nodemailer.createTransport(nodemailerConfig);
 
   return transporter.sendMail({

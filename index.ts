@@ -62,7 +62,10 @@ app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URL!);
+    await connectDB(
+      process.env.MONGO_URL ||
+        'mongodb://localhost:27017/NTH-STORE?retryWrites=true&w=majority',
+    );
     app.listen(port, () =>
       console.log(`⚡️[server]: Server is running at http://localhost:${port}`),
     );

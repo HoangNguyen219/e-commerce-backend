@@ -2,7 +2,7 @@ import Order, { ISingleOrderItem } from '../models/Order';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors';
-import { checkPermissions } from '../utils';
+import { checkPermissions, sendConfirmationEmail } from '../utils';
 import User, { IUser } from '../models/User';
 import moment from 'moment';
 import Config from '../models/Config';
@@ -85,6 +85,13 @@ const createOrder = async (req: Request, res: Response) => {
   await order.save({ session });
   await session.commitTransaction();
   setCurrentSession(null);
+
+  await sendConfirmationEmail({
+    name: req.user.name,
+    email: req.user.email,
+    orderId: order.id,
+    total,
+  });
 
   res.status(StatusCodes.CREATED).json({ order });
 };

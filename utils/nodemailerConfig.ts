@@ -1,8 +1,16 @@
+// export default {
+//   host: 'smtp.ethereal.email',
+//   port: 587,
+//   auth: {
+//     user: 'cordie78@ethereal.email',
+//     pass: 'gAwneB9aZHuZHryB53',
+//   },
+// };
+
 export default {
-  host: 'smtp.ethereal.email',
-  port: 587,
+  service: 'gmail',
   auth: {
-    user: 'cordie78@ethereal.email',
-    pass: 'gAwneB9aZHuZHryB53',
+    user: 'nthstore.nthstore@gmail.com',
+    pass: 'vcfnhccasyjqhejy',
   },
 };

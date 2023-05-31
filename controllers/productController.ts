@@ -82,9 +82,23 @@ const getAllProducts = async (req: Request, res: Response) => {
 
   const products = await result;
 
+  const maxPrice = await Product.aggregate([
+    {
+      $group: {
+        _id: null,
+        maxPrice: { $max: '$price' },
+      },
+    },
+  ]);
+
   const totalProducts = await Product.countDocuments(queryObject);
   const numOfPages = Math.ceil(totalProducts / limit);
-  res.status(StatusCodes.OK).json({ products, totalProducts, numOfPages });
+  res.status(StatusCodes.OK).json({
+    products,
+    totalProducts,
+    numOfPages,
+    maxPrice: maxPrice[0].maxPrice,
+  });
 };
 
 const getSingleProduct = async (req: Request, res: Response) => {
