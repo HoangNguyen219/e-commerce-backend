@@ -7,13 +7,12 @@ import {
   attachCookiesToResponse,
   checkPermissions,
 } from '../utils';
-import { Message, Role } from '../utils/enum';
+import { Message } from '../utils/enum';
 
 const getAllUsers = async (req: Request, res: Response) => {
   const { sort, customer } = req.query;
 
   const queryObject: Record<string, any> = {};
-  // queryObject.role = Role.User;
 
   if (customer) {
     queryObject.$or = [
@@ -116,7 +115,7 @@ const updateUser = async (req: Request, res: Response) => {
   await user!.save();
 
   const tokenUser = createTokenUser(user!);
-  attachCookiesToResponse(res, tokenUser);
+  attachCookiesToResponse(res, tokenUser, req);
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 

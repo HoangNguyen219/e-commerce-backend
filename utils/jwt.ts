@@ -1,10 +1,24 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { ITokenUser } from '../models/User';
 
-const attachCookiesToResponse = (res: Response, user: ITokenUser) => {
+const attachCookiesToResponse = (
+  res: Response,
+  user: ITokenUser,
+  req: Request,
+) => {
   const token = createJWT(user);
+  // const origin = req.headers.origin;
+  // const domain =
+  //   origin === process.env.ORIGIN
+  //     ? process.env.ORIGIN_DOMAIN
+  //     : process.env.ADMIN_ORIGIN_DOMAIN;
+
+  // console.log(domain);
+
   res.cookie('token', token, {
+    // domain: process.env.NODE_ENV === 'production' ? domain : '',
+    // path: '/',
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24, // 1d
     secure: process.env.NODE_ENV === 'production',

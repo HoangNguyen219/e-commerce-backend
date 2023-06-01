@@ -87,7 +87,8 @@ const login = async (req: Request, res: Response) => {
   }
 
   const tokenUser = createTokenUser(user);
-  attachCookiesToResponse(res, tokenUser);
+
+  attachCookiesToResponse(res, tokenUser, req);
 
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
@@ -149,9 +150,18 @@ const resetPassword = async (req: Request, res: Response) => {
 };
 
 const logout = async (req: Request, res: Response) => {
+  const origin = req.headers.origin;
+  const domain =
+    origin === process.env.ORIGIN
+      ? process.env.ORIGIN_DOMAIN
+      : process.env.ADMIN_ORIGIN_DOMAIN;
   res.cookie('token', 'logout', {
+    domain: process.env.NODE_ENV === 'production' ? domain : '',
+    path: '/',
     httpOnly: true,
     expires: new Date(Date.now()),
+    sameSite: 'none',
+    secure: process.env.NODE_ENV === 'production',
   });
   res.status(StatusCodes.OK).json({ msg: 'User logged out' });
 };
