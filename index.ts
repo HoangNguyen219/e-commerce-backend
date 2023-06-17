@@ -21,8 +21,6 @@ import addressRouter from './routes/addressRoute';
 import configRouter from './routes/configRoutes';
 import cloudinaryV2 from './service/cloudinary';
 
-// import cloudinary from 'cloudinary';
-
 dotenv.config();
 
 cloudinaryV2.config({
@@ -30,13 +28,6 @@ cloudinaryV2.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-
-// // cloudinaryV2.api.resources(
-// //   { type: 'upload', prefix: 'NTH-Store/' },
-// //   function (error, result) {
-// //     console.log(result);
-// //   },
-// // );
 
 const app: Express = express();
 const port = process.env.PORT || 5000;

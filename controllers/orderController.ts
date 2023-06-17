@@ -221,10 +221,6 @@ const showStats = async (req: Request, res: Response) => {
       ? new Date(Date.parse(endDateStr) + 1 * 24 * 60 * 60 * 1000)
       : new Date();
 
-  console.log(startDate);
-  console.log(endDate);
-  console.log(new Date());
-
   let revenue = await Order.aggregate([
     {
       $match: {
@@ -265,7 +261,6 @@ const showStats = async (req: Request, res: Response) => {
   const popularProducts = await Order.aggregate([
     {
       $match: {
-        processStatus: 'completed',
         createdAt: { $gte: startDate, $lte: endDate },
       },
     },

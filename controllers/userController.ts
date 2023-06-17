@@ -7,12 +7,14 @@ import {
   attachCookiesToResponse,
   checkPermissions,
 } from '../utils';
-import { Message } from '../utils/enum';
+import { Message, Role } from '../utils/enum';
 
 const getAllUsers = async (req: Request, res: Response) => {
   const { sort, customer } = req.query;
 
   const queryObject: Record<string, any> = {};
+
+  queryObject.role = Role.User;
 
   if (customer) {
     queryObject.$or = [
@@ -120,15 +122,11 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 const updateUserPassword = async (req: Request, res: Response) => {
-  const { oldPassword, newPassword, confirmPassword } = req.body;
+  const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword) {
     throw new BadRequestError(Message.PLEASE_PROVIDE_ALL_VALUES);
   }
   const user = await User.findOne({ _id: req.user.id });
-
-  if (newPassword !== confirmPassword) {
-    throw new BadRequestError(Message.PASSWORD_DO_NOT_MATCH);
-  }
 
   const isPasswordCorrect = await user!.comparePassword(oldPassword);
   if (!isPasswordCorrect) {
